@@ -1,18 +1,15 @@
 package Salt.Layla.AdressBook.AddressBookController;
 
-import Salt.Layla.AdressBook.model.Address;
-import Salt.Layla.AdressBook.model.Person;
+import Salt.Layla.AdressBook.Exceptions.NoContactFoundException;
+import Salt.Layla.AdressBook.model.AddressBook;
 import Salt.Layla.AdressBook.repository.AddressBookRepo;
-import jakarta.validation.Path;
 import jakarta.validation.Valid;
-import org.apache.coyote.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
+import java.util.List;
 
 @RestController
-@RequestMapping("/addressBook")
+@RequestMapping("/address")
 public class AddressBookController {
 
     private final AddressBookRepo repo;
@@ -22,23 +19,30 @@ public class AddressBookController {
     }
 
     @GetMapping
-    public Collection<Person> showAllContacts(){
+    public List<AddressBook> showAllContacts(){
         return repo.showAllContacts();
     }
 
-    @GetMapping("/{p}")
-    public boolean searchContact (@PathVariable Person p, Address a){
-        return repo.searchContact(p, a);
+    @GetMapping(value = "/{name}")
+    public AddressBook searchByName (@PathVariable String name) throws NoContactFoundException {
+        return repo.searchByName(name);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Collection<Person> addContactPerson(@Valid @RequestBody Person p, Address a) {
-        return repo.addContactPerson(p, a);
+    public AddressBook addContactPerson(@Valid @RequestBody AddressBook addressBook) {
+        return repo.addContactPerson(addressBook);
     }
 
-    @DeleteMapping("/{p}")
-public void removeContact(@PathVariable Person p){
-        repo.removeContact(p);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{name}")
+    public void removeContact(@PathVariable String name){
+        repo.removeContact(name);
+}
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping({"/{name}"})
+    public void updateContact(@RequestBody AddressBook addressBook, @PathVariable String name){
+        repo.updateContact(addressBook, name);
 }
 }
